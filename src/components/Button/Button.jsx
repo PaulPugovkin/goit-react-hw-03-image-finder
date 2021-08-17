@@ -1,7 +1,9 @@
-const Button = () => {
+const Button = ({ onLoadMore }) => {
     return (
         <>
-            <button>button</button>
+            <button className="Button" type="button" onClick={onLoadMore}>
+                Load more
+            </button>
         </>
     );
 };
