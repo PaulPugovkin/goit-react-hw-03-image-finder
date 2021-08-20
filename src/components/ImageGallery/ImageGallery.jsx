@@ -1,13 +1,15 @@
 import ImageGalleryItem from '../ImageGalleryItem';
 
-const ImageGallery = ({ hits }) => {
+const ImageGallery = ({ hits, onImageClick }) => {
     return (
         <ul className="ImageGallery">
             {hits.map(hit => (
                 <ImageGalleryItem
+                    largeImage={hit.largeImageURL}
                     key={hit.id}
                     src={hit.webformatURL}
-                    alt={hit.id}
+                    alt={hit.tags}
+                    onImageClick={onImageClick}
                 />
             ))}
         </ul>
