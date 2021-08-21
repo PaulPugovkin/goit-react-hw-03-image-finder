@@ -17,42 +17,41 @@ class App extends Component {
         modalAlt: '',
     };
 
-    handleSubmit = e => {
-        this.setState({ status: 'pending' });
-        e.preventDefault();
-        try {
-            fetchOptions.PAGE = 1;
-            fetchingImages(this.state.searchQuery).then(
-                res => this.setState({ hits: res.hits }),
-                this.setState({ status: 'resolved' }),
-            );
-        } catch (error) {
-            this.setState({ status: 'rejected' });
-            console.log(error);
-        }
-    };
-
     handleInputChange = e => {
         this.setState({ searchQuery: e.target.value });
     };
 
+    handleSubmit = e => {
+        e.preventDefault();
+
+        fetchOptions.PAGE = 1;
+        fetchingImages(this.state.searchQuery)
+            .then(res => this.setState({ hits: res.hits, status: 'resolved' }))
+            .then(this.setState({ status: 'pending' }))
+            .catch(err => {
+                this.setState({ status: 'rejected' });
+                console.log(err);
+            });
+        console.log(this.state.status);
+    };
+
     onLoadMore = () => {
-        this.setState({ status: 'pending' });
-        try {
-            fetchOptions.PAGE += 1;
-            fetchingImages(this.state.searchQuery).then(res =>
-                this.setState(prevState => {
-                    return {
-                        hits: [...prevState.hits, ...res.hits],
-                    };
-                }),
-            );
-            this.setState({ status: 'resolved' });
-        } catch (error) {
-            this.setState({ status: 'rejected' });
-            alert('Retry your search');
-            console.log(error);
-        }
+        fetchOptions.PAGE += 1;
+        fetchingImages(this.state.searchQuery)
+            .then(res =>
+                this.setState(prevState => ({
+                    hits: [...prevState.hits, ...res.hits],
+                    status: 'resolved',
+                })),
+            )
+            .then(this.setState({ status: 'pending' }))
+            .catch(error => console.log(error))
+            .finally(() => {
+                window.scrollTo({
+                    top: document.documentElement.scrollHeight,
+                    behavior: 'smooth',
+                });
+            });
     };
 
     onImageClick = e => {
@@ -80,30 +79,36 @@ class App extends Component {
     };
 
     render() {
+        const { hits, modal, status, modalAlt, modalImage } = this.state;
+        const {
+            handleSubmit,
+            handleInputChange,
+            onImageClick,
+            onLoadMore,
+            handleKeydown,
+            handleBackdropClick,
+        } = this;
         return (
             <>
                 <Searchbar
-                    onSubmit={this.handleSubmit}
-                    onChange={this.handleInputChange}
+                    onSubmit={handleSubmit}
+                    onChange={handleInputChange}
                 />
-                {this.state.hits && (
-                    <ImageGallery
-                        onImageClick={this.onImageClick}
-                        hits={this.state.hits}
-                    />
+                {hits && hits.length > 0 && (
+                    <>
+                        <ImageGallery onImageClick={onImageClick} hits={hits} />
+                        <Button onLoadMore={onLoadMore} />
+                    </>
                 )}
-                {this.state.hits && this.state.hits.length > 0 && (
-                    <Button onLoadMore={this.onLoadMore} />
-                )}
-                {this.state.modal && (
+                {modal && (
                     <Modal
-                        modalAlt={this.state.modalAlt}
-                        modalImage={this.state.modalImage}
-                        onClose={this.handleKeydown}
-                        handleBackdropClick={this.handleBackdropClick}
+                        modalAlt={modalAlt}
+                        modalImage={modalImage}
+                        onClose={handleKeydown}
+                        handleBackdropClick={handleBackdropClick}
                     />
                 )}
-                {this.state.status === 'pending' && (
+                {status === 'pending' && (
                     <Loader
                         className="spinner"
                         type="TailSpin"

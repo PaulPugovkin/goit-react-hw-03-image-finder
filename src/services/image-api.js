@@ -6,15 +6,11 @@ export const fetchOptions = {
 };
 
 async function fetchImages(value) {
-    try {
-        const fetching = await fetch(
-            `${fetchOptions.MAIN_URL}?key=${fetchOptions.API_KEY}&q=${value}&page=${fetchOptions.PAGE}&image_type=photo&orientation=horizontal&per_page=${fetchOptions.ITEMS_PER_PAGE}`,
-        );
-        const result = await fetching.json();
-        return result;
-    } catch (error) {
-        console.log('Error', error);
-    }
+    const fetching = await fetch(
+        `${fetchOptions.MAIN_URL}?key=${fetchOptions.API_KEY}&q=${value}&page=${fetchOptions.PAGE}&image_type=photo&orientation=horizontal&per_page=${fetchOptions.ITEMS_PER_PAGE}`,
+    );
+    const result = await fetching.json();
+    return result;
 }
 
 export default fetchImages;
